@@ -63,7 +63,7 @@
                "run" : "make test-deps"
             },
             {
-               "run" : "make test"
+               "run" : "PROMISED_COMMAND_DEBUG=1 TEST_MAX_CONCUR=1 make test"
             }
          ],
          "strategy" : {
