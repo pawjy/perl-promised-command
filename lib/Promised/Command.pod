@@ -318,9 +318,15 @@ perl-streams repository <https://github.com/manakai/perl-streams>.
 
 Wakaba <wakaba@suikawiki.org>.
 
+=head1 HISTORY
+
+This repository was located at
+<https://github.com/wakaba/perl-promised-command> until 2 February,
+2022.
+
 =head1 LICENSE
 
-Copyright 2015-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
