@@ -19,6 +19,7 @@ sub new ($%) {
   $self->logs ($opts->{logs}); # or undef
   $self->propagate_signal ($opts->{propagate_signal});
   $self->signal_before_destruction ($opts->{signal_before_destruction});
+  $self->{no_tty} = $opts->{no_tty};
   return $self;
 } # new
 
@@ -141,7 +142,8 @@ sub start ($) {
   ])->then (sub {
     $self->{run_cmd} = my $cmd = Promised::Command->new ([
       @{$self->docker},
-      'run', '-t', '-d',
+      'run', '-d',
+      ($self->{no_tty} ? () : ('-t')),
       (defined $self->{dockerhost_ipaddr} ? ('--add-host=dockerhost:' . $self->{dockerhost_ipaddr}) : ()),
       @{$self->docker_run_options},
       $image,
@@ -263,7 +265,7 @@ sub DESTROY ($) {
 
 =head1 LICENSE
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

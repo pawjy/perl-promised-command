@@ -133,6 +133,12 @@ L<Promised::Command> object.  If a defined value is set, the C<docker
 logs> command is invoked during the command is running and its output
 is redirected to the output handler.  The default is C<undef>.
 
+=item ...->new (no_tty => $boolean, ...)
+
+If true, no pseudo-TTY is attached to the docker process.  In other
+word, the C<-t> option is specified to the C<docker run> command when
+false.
+
 =item ...->new (propagate_signal => $boolean, ...)
 
 =item $cmd->propagate_signal ($boolean)
@@ -165,7 +171,7 @@ object (unless the intention is running the command forever).
 
 =head1 LICENSE
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
