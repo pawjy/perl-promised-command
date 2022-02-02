@@ -60,6 +60,9 @@
                "uses" : "actions/checkout@v2"
             },
             {
+               "run" : "docker version"
+            },
+            {
                "run" : "make test-deps"
             },
             {
