@@ -298,6 +298,11 @@ Return a short error message for the developer, if available.
 
 =back
 
+=head1 ENVIRONMENT VARIABLE
+
+If the environment variable C<PROMISED_COMMAND_DEBUG> is set to a true
+value, debug messages are printed to the standard error output.
+
 =head1 SEE ALSO
 
 There are related modules: L<Promised::Command::Signals>,

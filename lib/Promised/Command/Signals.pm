@@ -15,9 +15,20 @@ our $Action = {
   TERM => 'die',
 };
 
-sub add_handler ($$$) {
-  my (undef, $signal, $code) = @_;
+my $DEBUG = $ENV{PROMISED_COMMAND_DEBUG};
+
+sub add_handler ($$$;%) {
+  my (undef, $signal, $code, %args) = @_;
   return if $Handlers->{$signal}->{$code};
+  my $name = '';
+  if ($DEBUG) {
+    if (defined $args{name}) {
+      $name = '' . $args{name};
+    } else {
+      require Carp;
+      $name = $code . Carp::shortmess ();
+    }
+  }
   unless (keys %{$Handlers->{$signal} or {}}) {
     $Sig->{$signal} = AE::signal $signal => sub {
       my $canceled;
@@ -25,9 +36,12 @@ sub add_handler ($$$) {
       AE::log alert => "SIG$signal received";
       Promise->all ([
         map {
-          my $code = $_;
-          Promise->resolve ($cancel)->then ($code)->catch (sub {
-            AE::log alert => "Died within signal handler: $_[0]";
+          my ($code, $name) = @$_;
+          AE::log alert => qq{Running signal handler "$name"...} if $DEBUG;
+          Promise->resolve ($cancel)->then ($code)->finally (sub {
+            AE::log alert => qq{Signal handler "$name" done} if $DEBUG;
+          })->catch (sub {
+            AE::log alert => qq{Died within signal handler "$name": $_[0]};
           });
         } values %{$Handlers->{$signal} or {}},
       ])->then (sub {
@@ -39,8 +53,10 @@ sub add_handler ($$$) {
         }
       });
     };
+    AE::log alert => "Promised::Command::Signals handler for SIG$signal installed" if $DEBUG;
   }
-  $Handlers->{$signal}->{$code} = $code;
+  $Handlers->{$signal}->{$code} = [$code, $name];
+  AE::log alert => qq{A SIG$signal handler "$name" added} if $DEBUG;
   return bless [$signal, $code], 'Promised::Command::Signals::Handler';
 } # add_handler
 
@@ -78,7 +94,7 @@ sub DESTROY ($) {
 
 =head1 LICENSE
 
-Copyright 2015-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

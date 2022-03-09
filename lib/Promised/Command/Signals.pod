@@ -25,7 +25,7 @@ The following methods are available:
 
 =over 4
 
-=item $sig = Promised::Command::Signals->add_handler ($name, $code)
+=item $sig = Promised::Command::Signals->add_handler ($name, $code, NAME => VALUE, ...)
 
 Register a signal handler code.
 
@@ -41,6 +41,11 @@ default action of the signal.  For example, a C<INT> signal is
 canceled, the script is not terminated after the processing of signal
 handlers.  Note that canceling the default action does not prevent
 from other signal handler codes invoked.
+
+Additional key/value pairs can be specified as third or later
+arguments, interpreted as named parameters.  If a C<name> parameter is
+specified, its value is used when the handler is identified within
+messages in debug mode.
 
 It returns an object.  The application must preserve a reference to it
 while the handler code should be effective.
@@ -63,6 +68,11 @@ This method returns different objects whenever the method is invoked.
 
 =back
 
+=head1 ENVIRONMENT VARIABLE
+
+If the environment variable C<PROMISED_COMMAND_DEBUG> is set to a true
+value, debug messages are printed to the standard error output.
+
 =head1 DEPENDENCY
 
 The module requires Perl 5.10 or later.
@@ -77,7 +87,7 @@ Wakaba <wakaba@suikawiki.org>.
 
 =head1 LICENSE
 
-Copyright 2015-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

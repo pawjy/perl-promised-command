@@ -158,8 +158,8 @@ sub start ($) {
       for my $name (qw(INT TERM QUIT)) {
         $self->{signal_handlers}->{$name}
             = Promised::Command::Signals->add_handler ($name => sub {
-                $self->stop (signal => $name);
-              });
+                return $self->stop (signal => $name);
+              }, name => "Docker |$image|");
       }
     }
     

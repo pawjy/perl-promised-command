@@ -207,7 +207,7 @@ sub _r (@) {
 
 sub run ($) {
   my $self = $_[0];
-  return Promise->reject (_r is_error => 1, message => "|run| already invoked")
+  return Promise->reject (_r is_error => 1, message => "|run| already invoked", name => '')
       if defined $self->{wait_promise};
   $self->{running} = 1;
   $self->{wait_promise} = Promise->new (sub {
@@ -228,6 +228,8 @@ sub run ($) {
     $args{'<'} = $self->{stdin} if defined $self->{stdin};
     $args{'>'} = $self->{stdout} if defined $self->{stdout};
     $args{'2>'} = $self->{stderr} if defined $self->{stderr};
+    my $command = [$self->{command}, @{$self->{args}}];
+    my $name = "Command |$command->[0]|";
     if ($self->{propagate_signal}) {
       for my $sig (ref $self->{propagate_signal}
                        ? @{$self->{propagate_signal}}
@@ -236,7 +238,7 @@ sub run ($) {
         require Promised::Command::Signals;
         $self->{signal_handlers}->{$from} = Promised::Command::Signals->add_handler ($from => sub {
           kill $to, $self->{pid} if $self->{running};
-        });
+        }, name => $name);
       }
     }
     $self->{timer} = AE::timer $self->{timeout}, 0, sub {
@@ -249,7 +251,6 @@ sub run ($) {
         delete $self->{timer};
       });
     }
-    my $command = [$self->{command}, @{$self->{args}}];
     my $command_id = $CommandID++;
     warn "Command[$command_id]: Start |@$command|\n" if $DEBUG;
     (run_cmd $command, %args)->cb (sub {
@@ -263,17 +264,17 @@ sub run ($) {
       }
       warn "Command[$command_id]: Done @{[$result >> 8]}\n" if $DEBUG;
       if ($result & 0x7F) {
-        $ng->(_r is_error => 1, core_dump => !!($result & 0x80), signal => $result & 0x7F);
+        $ng->(_r is_error => 1, core_dump => !!($result & 0x80), signal => $result & 0x7F, name => $name);
       } else {
-        $ok->(_r exit_code => $result >> 8);
+        $ok->(_r exit_code => $result >> 8, name => $name);
       }
     });
   });
-  return Promise->resolve (_r);
+  return Promise->resolve (_r name => '');
 } # run
 
 sub pid ($) {
-  return $_[0]->{pid} || die _r is_error => 1, message => "Not yet |run|";
+  return $_[0]->{pid} || die _r is_error => 1, message => "Not yet |run|", name => '';
 } # pid
 
 sub running ($) {
@@ -281,7 +282,7 @@ sub running ($) {
 } # running
 
 sub wait ($) {
-  return $_[0]->{wait_promise} || Promise->reject (_r is_error => 1, message => "Not yet |run|");
+  return $_[0]->{wait_promise} || Promise->reject (_r is_error => 1, message => "Not yet |run|", name => '');
 } # wait
 
 sub send_signal ($$) {
@@ -289,9 +290,9 @@ sub send_signal ($$) {
   return Promise->new (sub {
     my $pid = $self->pid; # or die
     if ($self->running) {
-      $_[0]->(_r killed => kill $signal, $pid);
+      $_[0]->(_r killed => (kill $signal, $pid), name => '');
     } else {
-      $_[0]->(_r killed => 0);
+      $_[0]->(_r killed => 0, name => '');
     }
   });
 } # send_signal
@@ -326,16 +327,17 @@ sub killed ($) { $_[0]->{killed} }
 
 sub stringify ($) {
   if ($_[0]->{is_error} and defined $_[0]->{message}) {
-    return "Error: $_[0]->{message}";
+    return "$_[0]->{name}: Error: $_[0]->{message}";
   } elsif (defined $_[0]->{signal}) {
-    return sprintf "Exit with signal %d%s",
+    return sprintf "%s: Exit with signal %d%s",
+        $_[0]->{name},
         $_[0]->{signal}, $_[0]->{core_dump} ? ' with core dump' : '';
   } elsif (defined $_[0]->{exit_code}) {
-    return sprintf "Exit code %d", $_[0]->{exit_code};
+    return sprintf "%s: Exit code %d", $_[0]->{name}, $_[0]->{exit_code};
   } elsif ($_[0]->{is_error}) {
-    return 'Unknown error';
+    return "$_[0]->{name}: Unknown error";
   } else {
-    return 'Success';
+    return "$_[0]->{name}: Success";
   }
 } # stringify
 
@@ -343,7 +345,7 @@ sub stringify ($) {
 
 =head1 LICENSE
 
-Copyright 2015-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
