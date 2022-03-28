@@ -79,8 +79,15 @@ sub signal_before_destruction ($;$) {
 } # signal_before_destruction
 
 my $DHH = $ENV{PROMISED_COMMAND_DOCKERHOST_HOST} // '';
-$DHH = $PlatformIsMacOSX ? 'docker.for.mac.localhost' : 'dockerhost'
-    unless length $DHH;
+my $NeedDH = 0;
+unless (length $DHH) {
+  if ($PlatformIsMacOSX) {
+    $DHH = 'docker.for.mac.localhost';
+  } else {
+    $DHH = 'dockerhost';
+    $NeedDH = 1;
+  }
+}
 sub dockerhost_host_for_container ($) {
   return $DHH;
 } # dockerhost_host_for_container
@@ -141,13 +148,13 @@ sub start ($) {
   });
 
   return Promise->all ([
-    $PlatformIsMacOSX ? undef : $self->get_dockerhost_ipaddr,
+    $NeedDH ? $self->get_dockerhost_ipaddr : undef,
   ])->then (sub {
     $self->{run_cmd} = my $cmd = Promised::Command->new ([
       @{$self->docker},
       'run', '-d',
       ($self->{no_tty} ? () : ('-t')),
-      (defined $self->{dockerhost_ipaddr} ? ('--add-host=dockerhost:' . $self->{dockerhost_ipaddr}) : ()),
+      ($NeedDH ? ('--add-host=dockerhost:' . $self->{dockerhost_ipaddr}) : ()),
       @{$self->docker_run_options},
       $image,
       @{$self->{command}},
