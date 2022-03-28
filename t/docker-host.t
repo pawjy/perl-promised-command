@@ -9,11 +9,6 @@ use Promised::Flow;
 
 my $Docker = undef;
 
-if ($ENV{TRAVIS} and $ENV{TRAVIS_OS_NAME} eq 'osx' and not -x ($Docker || 'docker')) {
-  print "1..1\nok 1 # skip Travis on Mac OS X does not support docker\n";
-  exit 0;
-}
-
 test {
   my $c = shift;
   my $cmd = Promised::Command::Docker->new (

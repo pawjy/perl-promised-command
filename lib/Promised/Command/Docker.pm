@@ -1,7 +1,7 @@
 package Promised::Command::Docker;
 use strict;
 use warnings;
-our $VERSION = '1.0';
+our $VERSION = '2.0';
 use Promise;
 use Promised::Flow;
 use Promised::Command;
@@ -78,8 +78,11 @@ sub signal_before_destruction ($;$) {
   return $_[0]->{signal_before_destruction};
 } # signal_before_destruction
 
+my $DHH = $ENV{PROMISED_COMMAND_DOCKERHOST_HOST} // '';
+$DHH = $PlatformIsMacOSX ? 'docker.for.mac.localhost' : 'dockerhost'
+    unless length $DHH;
 sub dockerhost_host_for_container ($) {
-  return $PlatformIsMacOSX ? 'docker.for.mac.localhost' : 'dockerhost';
+  return $DHH;
 } # dockerhost_host_for_container
 
 sub get_dockerhost_ipaddr ($) {

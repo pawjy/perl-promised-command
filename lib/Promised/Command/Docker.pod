@@ -39,6 +39,12 @@ Return a host name that can be used within the Docker container to
 connect to the host (i.e. the environment where the application is
 running).
 
+The value can be altered by specifying the environment variable
+C<PROMISED_COMMAND_DOCKERHOST_HOST> before the loading of the module.
+
+Note that the value might not be a valid host string when the
+environment variable is set to an invalid value.
+
 =item $cmd->get_dockerhost_ipaddr->then (sub { $string = shift })
 
 =item Promised::Command::Docker->get_dockerhost_ipaddr->then (sub { $string = shift })
@@ -168,6 +174,17 @@ command appropriately before discarding the reference to the command
 object (unless the intention is running the command forever).
 
 =back
+
+=head1 ENVIRONMENT VARIABLES
+
+C<PROMISED_COMMAND_DEBUG>: See L<Promised::Command>.
+
+C<PROMISED_COMMAND_DOCKERHOST_HOST>: See
+C<dockerhost_host_for_container>.
+
+=head1 AUTHOR
+
+Wakaba <wakaba@suikawiki.org>.
 
 =head1 LICENSE
 
