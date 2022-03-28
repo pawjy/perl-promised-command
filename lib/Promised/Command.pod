@@ -73,7 +73,7 @@ is used.
 
 =item $cmd->wd ($string)
 
-=item $string = $cwd->wd
+=item $string = $cmd->wd
 
 Get or set the current working directory for the command as a
 (system-dependent byte) string.
