@@ -274,7 +274,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGTERM received\n.*Died within signal handler: sigterm received! at .+\n.*terminated by SIGTERM};
+      like $stderr, qr{SIGTERM received\n.*Died within signal handler "": sigterm received! at .+\n.*terminated by SIGTERM};
     } $c;
     done $c;
     undef $c;
@@ -316,7 +316,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGTERM received\n(?:.*sigterm received then.+\n.*Died within signal handler: sigterm received! at .+|.*Died within signal handler: sigterm received! at .+\n.*sigterm received then.+)\n.*terminated by SIGTERM};
+      like $stderr, qr{SIGTERM received\n(?:.*sigterm received then.+\n.*Died within signal handler "": sigterm received! at .+|.*Died within signal handler "": sigterm received! at .+\n.*sigterm received then.+)\n.*terminated by SIGTERM};
     } $c;
     done $c;
     undef $c;
@@ -352,7 +352,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGTERM received\n.*Died within signal handler: sigterm received!\n.*terminated by SIGTERM};
+      like $stderr, qr{SIGTERM received\n.*Died within signal handler "": sigterm received!.*\n.*terminated by SIGTERM};
     } $c;
     done $c;
     undef $c;
@@ -452,7 +452,7 @@ run_tests;
 
 =head1 LICENSE
 
-Copyright 2015-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
