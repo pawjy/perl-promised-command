@@ -92,12 +92,18 @@ sub dockerhost_host_for_container ($) {
   return $DHH;
 } # dockerhost_host_for_container
 
+sub _r (@) {
+  return bless {@_}, 'Promised::Command::Result';
+} # _r
+
 sub get_dockerhost_ipaddr ($) {
   my $self = $_[0];
   return Promise->resolve ($self->{dockerhost_ipaddr})
       if ref $self and defined $self->{dockerhost_ipaddr};
-  return Promise->reject ("Can't get dockerhost IP address on Mac OS X")
-      if $PlatformIsMacOSX;
+  return Promise->reject (
+    _r is_error => 1, name => "Docker |$self->{image}|",
+       message => "Can't get dockerhost IP address on Mac OS X",
+  ) if $PlatformIsMacOSX;
   my $ip_cmd = Promised::Command->new ([qw{ip route list dev docker0}]);
   $ip_cmd->stdout (\my $ip);
   return $ip_cmd->run->then (sub { return $ip_cmd->wait })->then (sub {
@@ -107,7 +113,9 @@ sub get_dockerhost_ipaddr ($) {
     no warnings; # Odd number of elements
     my %ip = @ip;
     $ip = $ip{src};
-    die "Can't get docker0's IP address" unless defined $ip and $ip =~ /\A[0-9.]+\z/;
+    die _r is_error => 1, name => "Docker |$self->{image}|",
+           message => "Can't get docker0's IP address",
+        unless defined $ip and $ip =~ /\A[0-9.]+\z/;
     $self->{dockerhost_ipaddr} = $ip if ref $self;
     return $ip;
   });
@@ -116,10 +124,6 @@ sub get_dockerhost_ipaddr ($) {
 sub get_container_ipaddr ($) {
   return $_[0]->{get_container_ipaddr};
 } # get_container_ipaddr
-
-sub _r (@) {
-  return bless {@_}, 'Promised::Command::Result';
-} # _r
 
 sub _run ($$) {
   my ($p, $code) = @_;
@@ -136,11 +140,14 @@ sub start ($) {
   my $self = $_[0];
 
   my $image = $self->{image};
-  return Promise->reject (_r is_error => 1, message => "|image| is not specified", name => 'docker')
-      unless defined $image;
+  return Promise->reject (
+    _r is_error => 1, message => "|image| is not specified", name => 'docker',
+  ) unless defined $image;
   
-  return Promise->reject (_r is_error => 1, message => "|start| already invoked", name => 'docker')
-      if defined $self->{self_pid};
+  return Promise->reject (
+    _r is_error => 1, message => "|start| already invoked",
+       name => "Docker |$image|",
+  ) if defined $self->{self_pid};
   $self->{self_pid} = $$;
   my ($s_container_ipaddr, $err_container_ipaddr);
   $self->{get_container_ipaddr} = Promise->new (sub {
@@ -191,7 +198,10 @@ sub start ($) {
         return $cmd->wait;
       })->then (sub {
         chomp $addr;
-        die "Failed to get docker container's IP address" unless $addr;
+        die _r is_error => 1,
+               message => "Failed to get docker container's IP address",
+               name => "Docker |$image|",
+            unless $addr;
         $s_container_ipaddr->($addr);
       })->catch (sub {
         $err_container_ipaddr->($_[0]);
