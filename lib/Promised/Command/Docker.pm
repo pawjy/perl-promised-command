@@ -203,7 +203,7 @@ sub start ($) {
         die $r unless $r->exit_code == 0;
         warn "Docker |$image|: IP address obtained: |$addr|\n" if $DEBUG;
         chomp $addr;
-        if (not defined $addr) {
+        if (not $addr) {
           if ($DEBUG) {
             my $cmd = Promised::Command->new ([
               @{$self->{docker}},
