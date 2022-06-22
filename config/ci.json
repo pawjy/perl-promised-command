@@ -2,6 +2,11 @@
   "github": {
     "pmbp": "5.10+",
     "macos": true,
+    
+    "matrix_allow_failure": [
+      {"os": "macos-latest"}
+    ],
+    
     "merger": true,
     "gaa": true
   }
