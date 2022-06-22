@@ -8,6 +8,7 @@ use Promised::Command;
 use Promised::Command::Signals;
 
 my $PlatformIsMacOSX = $^O eq 'darwin';
+my $DEBUG = $ENV{PROMISED_COMMAND_DEBUG};
 
 sub new ($%) {
   my $self = bless {}, shift;
@@ -197,6 +198,9 @@ sub start ($) {
       $cmd->run->then (sub {
         return $cmd->wait;
       })->then (sub {
+        my $r = $_[0];
+        die $r unless $r->exit_code == 0;
+        warn "Docker |$image|: IP address obtained: |$addr|\n" if $DEBUG;
         chomp $addr;
         die _r is_error => 1,
                message => "Failed to get docker container's IP address",
