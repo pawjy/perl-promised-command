@@ -136,10 +136,10 @@ sub start ($) {
   my $self = $_[0];
 
   my $image = $self->{image};
-  return Promise->reject (_r is_error => 1, message => "|image| is not specified")
+  return Promise->reject (_r is_error => 1, message => "|image| is not specified", name => 'docker')
       unless defined $image;
   
-  return Promise->reject (_r is_error => 1, message => "|start| already invoked")
+  return Promise->reject (_r is_error => 1, message => "|start| already invoked", name => 'docker')
       if defined $self->{self_pid};
   $self->{self_pid} = $$;
   my ($s_container_ipaddr, $err_container_ipaddr);
@@ -191,6 +191,7 @@ sub start ($) {
         return $cmd->wait;
       })->then (sub {
         chomp $addr;
+        die "Failed to get docker container's IP address" unless $addr;
         $s_container_ipaddr->($addr);
       }, sub {
         $err_container_ipaddr->($_[0]);
@@ -213,7 +214,7 @@ sub start ($) {
       };
 
       return _run $p, sub {
-        return _r exit_code => 0;
+        return _r exit_code => 0, name => 'docker';
       };
     });
   });
