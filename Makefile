@@ -40,7 +40,10 @@ test: test-deps test-main
 
 test-deps: deps
 
-test-main:
-	$(PROVE) t/*.t
+test-main: test-main-raw test-main-debug
+test-main-raw:
+	PROMISED_COMMAND_DEBUG= $(PROVE) t/*.t
+test-main-debug:
+	PROMISED_COMMAND_DEBUG=1 $(PROVE) t/*.t
 
 ## License: Public Domain.
