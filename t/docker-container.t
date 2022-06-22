@@ -9,11 +9,6 @@ use Promised::Flow;
 
 my $Docker = undef;
 
-if ($ENV{TRAVIS} and $ENV{TRAVIS_OS_NAME} eq 'osx' and not -x ($Docker || 'docker')) {
-  print "1..1\nok 1 # skip Travis on Mac OS X does not support docker\n";
-  exit 0;
-}
-
 test {
   my $c = shift;
   my $cmd = Promised::Command::Docker->new (
@@ -41,11 +36,39 @@ test {
   });
 } n => 2, name => 'get_container_ipaddr (object method)';
 
+test {
+  my $c = shift;
+  my $cmd = Promised::Command::Docker->new (
+    docker => $Docker,
+    image => 'debian:sid',
+    docker_run_options => [
+      '--net', 'host',
+    ],
+    command => ['sleep', 100],
+  );
+  $cmd->start->then (sub {
+    return $cmd->get_container_ipaddr;
+  })->then (sub {
+    my $r = $_[0];
+    test {
+      ok 0, $r;
+    } $c;
+  }, sub {
+    my $e = $_[0];
+    test {
+      like $e, qr{Failed to get docker container's IP address}, $e;
+    } $c;
+  })->then (sub {
+    done $c;
+    undef $c;
+  });
+} n => 1, name => 'get_container_ipaddr (object method), no IP address';
+
 run_tests;
 
 =head1 LICENSE
 
-Copyright 2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2017-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

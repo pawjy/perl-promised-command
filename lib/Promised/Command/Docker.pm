@@ -193,7 +193,7 @@ sub start ($) {
         chomp $addr;
         die "Failed to get docker container's IP address" unless $addr;
         $s_container_ipaddr->($addr);
-      }, sub {
+      })->catch (sub {
         $err_container_ipaddr->($_[0]);
       });
 
