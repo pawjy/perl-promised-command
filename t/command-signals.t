@@ -35,7 +35,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGTERM received\nsigterm received!\n.*terminated by SIGTERM};
+      like $stderr, qr{SIGTERM received\n.*sigterm received!\n.*terminated by SIGTERM};
     } $c;
     done $c;
     undef $c;
@@ -154,7 +154,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGINT received\n(?:sigint received 1\nsigint received 2\n|sigint received 2\nsigint received 1\n).*terminated by SIGINT};
+      like $stderr, qr{SIGINT received\n.*(?:sigint received 1\nsigint received 2\n|sigint received 2\nsigint received 1\n).*terminated by SIGINT}s;
     } $c;
     done $c;
     undef $c;
@@ -194,7 +194,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGINT received\nsigint received 2\n.*terminated by SIGINT};
+      like $stderr, qr{SIGINT received\n.*sigint received 2\n.*terminated by SIGINT};
     } $c;
     done $c;
     undef $c;
@@ -239,7 +239,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGQUIT received\nsigquit received!\nsigquit promise resolved\n.*terminated by SIGQUIT};
+      like $stderr, qr{SIGQUIT received\n.*sigquit received!\nsigquit promise resolved\n.*terminated by SIGQUIT};
     } $c;
     done $c;
     undef $c;
@@ -400,7 +400,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 1;
-      like $stderr, qr{SIGTERM received\nsigterm received!\n.*SIGINT received\nsigint received\n.*terminated by SIGINT};
+      like $stderr, qr{SIGTERM received\n.*sigterm received!\n.*SIGINT received\nsigint received\n.*terminated by SIGINT};
     } $c;
     done $c;
     undef $c;
@@ -441,7 +441,7 @@ test {
     my $result = $_[0];
     test {
       is $result->exit_code, 3;
-      like $stderr, qr{SIGTERM received\nsigterm received!\nended\n$};
+      like $stderr, qr{SIGTERM received\n.*sigterm received!\nended\n$};
     } $c;
     done $c;
     undef $c;

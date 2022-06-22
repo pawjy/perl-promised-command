@@ -400,7 +400,7 @@ test {
     return $cmd->send_signal ('INT');
   })->then (sub { return $cmd->wait })->catch (sub { warn $_[0] })->then (sub {
     test {
-      like $stderr, qr{started.*\nstarted.*\n.*SIGINT received\n(?:SIGQUIT\n.*terminated by SIGINT|.*terminated by SIGINT.*\nSIGQUIT)}s;
+      like $stderr, qr{started.*\nstarted.*\n.*SIGINT received\n.*(?:SIGQUIT\n.*terminated by SIGINT|terminated by SIGINT.*\nSIGQUIT)}s;
     } $c;
   })->then (sub {
     done $c;
@@ -412,7 +412,7 @@ run_tests;
 
 =head1 LICENSE
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

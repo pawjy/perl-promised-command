@@ -51,7 +51,9 @@
          ]
       },
       "test" : {
+         "continue-on-error" : "${{ matrix.experimental }}",
          "env" : {
+            "CIRCLE_ARTIFACTS" : "/tmp/circle-artifacts/test",
             "PMBP_PERL_VERSION" : "${{ matrix.perl_version }}"
          },
          "runs-on" : "${{ matrix.os }}",
@@ -60,40 +62,52 @@
                "uses" : "actions/checkout@v2"
             },
             {
-               "run" : "docker version"
+               "run" : "mkdir -p $CIRCLE_ARTIFACTS"
             },
             {
                "run" : "make test-deps"
             },
             {
-               "run" : "PROMISED_COMMAND_DEBUG=1 TEST_MAX_CONCUR=1 make test"
+               "run" : "make test"
+            },
+            {
+               "uses" : "actions/upload-artifact@v3",
+               "with" : {
+                  "path" : "/tmp/circle-artifacts/test"
+               }
             }
          ],
          "strategy" : {
-            "fail-fast": false,
+            "fail-fast" : false,
             "matrix" : {
                "include" : [
                   {
+                     "experimental" : false,
                      "os" : "ubuntu-latest",
                      "perl_version" : "latest"
                   },
                   {
+                     "experimental" : true,
+                     "os" : "macos-latest",
+                     "perl_version" : "latest"
+                  },
+                  {
+                     "experimental" : false,
                      "os" : "ubuntu-latest",
                      "perl_version" : "5.14.2"
                   },
                   {
+                     "experimental" : true,
+                     "os" : "macos-latest",
+                     "perl_version" : "5.14.2"
+                  },
+                  {
+                     "experimental" : false,
                      "os" : "ubuntu-latest",
                      "perl_version" : "5.10.1"
                   },
                   {
-                     "os" : "macos-latest",
-                     "perl_version" : "latest"
-                  },
-                  {
-                     "os" : "macos-latest",
-                     "perl_version" : "5.14.2"
-                  },
-                  {
+                     "experimental" : true,
                      "os" : "macos-latest",
                      "perl_version" : "5.10.1"
                   }
