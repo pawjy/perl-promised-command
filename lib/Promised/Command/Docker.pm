@@ -188,43 +188,69 @@ sub start ($) {
       chomp $self->{container_id};
       delete $self->{run_cmd};
 
-      my $cmd = Promised::Command->new ([
-        @{$self->{docker}},
-        'inspect',
-        #'--format', '{{ .NetworkSettings.IPAddress }}',
-        '--format', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
-        $self->{container_id},
-      ]);
-      $cmd->stdout (\my $addr);
-      $cmd->run->then (sub {
-        return $cmd->wait;
-      })->then (sub {
-        my $r = $_[0];
-        die $r unless $r->exit_code == 0;
-        warn "Docker |$image|: IP address obtained: |$addr|\n" if $DEBUG;
-        chomp $addr;
-        if (not $addr) {
-          if ($DEBUG) {
-            my $cmd = Promised::Command->new ([
-              @{$self->{docker}},
-              'inspect',
-              $self->{container_id},
-            ]);
-            $cmd->stdout (\my $stdout);
-            #no return
-            $cmd->run->then (sub {
-              return $cmd->wait;
-            })->then (sub {
-              my $r = $_[0];
-              die $r unless $r->exit_code == 0;
-              warn "Docker |$image|: Inspect: |$stdout|\n";
-            });
-          }
-          die _r is_error => 1,
-                 message => "Failed to get docker container's IP address",
-                 name => "Docker |$image|";
+      my $inspect = sub {
+        my ($f) = @_;
+        my $cmd = Promised::Command->new ([
+          @{$self->{docker}},
+          'inspect',
+          (defined $f ? ('--format' => $f) : ()),
+          $self->{container_id},
+        ]);
+        $cmd->stdout (\my $stdout);
+        return $cmd->run->then (sub {
+          return $cmd->wait;
+        })->then (sub {
+          my $r = $_[0];
+          die $r unless $r->exit_code == 0;
+          warn "Docker |$image|: Inspect (@{[$f//'']}): |$stdout|\n" if $DEBUG;
+          return $stdout;
+        });
+      };
+      my $get_ipaddr = sub {
+        return $inspect->(
+          #'{{ .NetworkSettings.IPAddress }}',
+          '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
+        )->then (sub {
+          my $addr = shift;
+          chomp $addr;
+          return $addr || undef;
+        });
+      }; # $get_ipaddr
+      $get_ipaddr->()->then (sub {
+        my $addr = shift;
+        if (defined $addr) {
+          $s_container_ipaddr->($addr);
+          return;
         }
-        $s_container_ipaddr->($addr);
+
+        return promised_wait_until {
+          return $get_ipaddr->()->then (sub {
+            my $addr = shift;
+            if (defined $addr) {
+              $s_container_ipaddr->($addr);
+              return 'done';
+            }
+            
+            return $inspect->(
+              #'{{ .State.Status }},'
+              '{{ .State.Running }},{{ .State.FinishedAt }}',
+              #running,true,0001-01-01T00:00:00Z
+            )->then (sub {
+              my $r = $_[0];
+              if ($r eq 'false,0001-01-01T00:00:00Z') {
+                return not 'done';
+              } else {
+                if ($DEBUG) {
+                  #no return
+                  $inspect->(undef); # has debug output
+                }
+                die _r is_error => 1,
+                       message => "Failed to get docker container's IP address",
+                       name => "Docker |$image|";
+              }
+            });
+          });
+        } interval => 0.2;
       })->catch (sub {
         $err_container_ipaddr->($_[0]);
       });
