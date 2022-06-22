@@ -250,7 +250,7 @@ sub start ($) {
               }
             });
           });
-        } interval => 0.2;
+        } interval => 0.2, timeout => 60*5, name => "Docker |$image| IP address";
       })->catch (sub {
         $err_container_ipaddr->($_[0]);
       });
