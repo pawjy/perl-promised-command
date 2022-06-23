@@ -1,9 +1,9 @@
 AnyEvent~7.17
 Carp~1.50
 Cwd~3.75
-Filter::Util::Call~1.60
-Path::Tiny~0.118
-Scalar::Util~1.55
-Socket~2.031
+Filter::Util::Call~1.61
+Path::Tiny~0.122
+Scalar::Util~1.62
+Socket~2.033
 Term::ANSIColor~5.01
-Test::Builder~1.302183
+Test::Builder~1.302190
