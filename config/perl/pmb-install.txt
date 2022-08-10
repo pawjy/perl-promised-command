@@ -1,7 +1,7 @@
 AnyEvent~7.17
 Carp~1.50
 Cwd~3.75
-Filter::Util::Call~1.61
+Filter::Util::Call~1.62
 Path::Tiny~0.122
 Scalar::Util~1.63
 Socket~2.035
