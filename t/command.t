@@ -350,18 +350,20 @@ test {
 test {
   my $c = shift;
   my $cmd = Promised::Command->new (['ls']);
-  $cmd->send_signal (9)->catch (sub {
+  $cmd->send_signal (9)->then (sub {
+    test {
+      ok 1;
+    } $c;
+  }, sub {
     my $result = $_[0];
     test {
-      isa_ok $result, 'Promised::Command::Result';
-      ok $result->is_error;
-      is $result->message, 'Not yet |run|';
+      ok 0, $result;
     } $c;
   })->then (sub {
     done $c;
     undef $c;
   });
-} n => 3, name => 'send_signal before run';
+} n => 1, name => 'send_signal before run';
 
 test {
   my $c = shift;
