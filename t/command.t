@@ -150,7 +150,7 @@ test {
     test {
       isa_ok $result, 'Promised::Command::Result';
       ok $result->is_error;
-      is $result->message, 'Not yet |run|';
+      is $result->message, 'Not yet |run| (ls, wait)';
     } $c;
   })->then (sub {
     done $c;
@@ -173,7 +173,7 @@ test {
     test {
       isa_ok $result, 'Promised::Command::Result';
       ok $result->is_error;
-      is $result->message, '|run| already invoked';
+      is $result->message, '|run| already invoked (ls)';
     } $c;
   })->then (sub {
     done $c;
@@ -209,7 +209,7 @@ test {
   my $e = $@;
   isa_ok $e, 'Promised::Command::Result';
   ok $e->is_error;
-  is $e->message, 'Not yet |run|';
+  is $e->message, 'Not yet |run| (ls, pid)';
   done $c;
 } n => 3, name => 'pid before run';
 

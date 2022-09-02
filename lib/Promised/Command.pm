@@ -207,7 +207,7 @@ sub _r (@) {
 
 sub run ($) {
   my $self = $_[0];
-  return Promise->reject (_r is_error => 1, message => "|run| already invoked", name => '')
+  return Promise->reject (_r is_error => 1, message => "|run| already invoked ($self->{command})", name => '')
       if defined $self->{wait_promise};
   $self->{running} = 1;
   $self->{wait_promise} = Promise->new (sub {
@@ -274,7 +274,7 @@ sub run ($) {
 } # run
 
 sub pid ($) {
-  return $_[0]->{pid} || die _r is_error => 1, message => "Not yet |run|", name => '';
+  return $_[0]->{pid} || die _r is_error => 1, message => "Not yet |run| ($_[0]->{command}, pid)", name => '';
 } # pid
 
 sub running ($) {
@@ -282,7 +282,7 @@ sub running ($) {
 } # running
 
 sub wait ($) {
-  return $_[0]->{wait_promise} || Promise->reject (_r is_error => 1, message => "Not yet |run|", name => '');
+  return $_[0]->{wait_promise} || Promise->reject (_r is_error => 1, message => "Not yet |run| ($_[0]->{command}, wait)", name => '');
 } # wait
 
 sub send_signal ($$) {
