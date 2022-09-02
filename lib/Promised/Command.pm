@@ -288,8 +288,8 @@ sub wait ($) {
 sub send_signal ($$) {
   my ($self, $signal) = @_;
   return Promise->new (sub {
-    if ($self->running) {
-      my $pid = $self->pid; # or die
+    if ($self->running and defined $self->{pid}) {
+      my $pid = $self->{pid};
       $_[0]->(_r killed => (kill $signal, $pid), name => '');
     } else {
       $_[0]->(_r killed => 0, name => '');
