@@ -11,6 +11,18 @@ push our @CARP_NOT, qw(Streams::Filehandle WritableStream);
 my $DEBUG = $ENV{PROMISED_COMMAND_DEBUG};
 my $CommandID = int rand 10000;
 
+sub load_modules () {
+  require Carp;
+  require WritableStream;
+  require Streams::Filehandle;
+  require Streams::_Common;
+  require ArrayBuffer;
+  require DataView;
+  require ReadableStream;
+  require Promised::Command::Signals;
+  Promised::Command::Signals->load_modules;
+} # load_modules
+
 sub new ($$) {
   my $self = bless {args => []}, $_[0];
   ($self->{command}, @{$self->{args}}) = @{$_[1]};

@@ -410,6 +410,13 @@ test {
   });
 } n => 1, name => 'propagate_signal replacing';
 
+test {
+  my $c = shift;
+  Promised::Command->load_modules;
+  ok $c;
+  done $c;
+} n => 1;
+
 run_tests;
 
 =head1 LICENSE

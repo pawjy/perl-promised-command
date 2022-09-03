@@ -448,6 +448,25 @@ test {
   });
 } n => 2, name => 'ac: has handler';
 
+test {
+  my $c = shift;
+  my $cmd = Promised::Command->new (['perl', '-e', q{
+    use Promised::Command::Signals;
+    Promised::Command::Signals->load_modules;
+  }]);
+  $cmd->stderr (\my $stderr);
+  $cmd->run->then (sub {
+    return $cmd->wait;
+  })->then (sub {
+    my $result = $_[0];
+    test {
+      is $result->exit_code, 0;
+    } $c;
+    done $c;
+    undef $c;
+  });
+} n => 1;
+
 run_tests;
 
 =head1 LICENSE
