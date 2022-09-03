@@ -293,7 +293,14 @@ sub send_signal ($$) {
         my $pid = $self->{pid};
         $_[0]->(_r killed => (kill $signal, $pid), name => '');
       } else {
-        warn "$$: $self send_signal invoked; it's running but has no pid ($self->{command})";
+        warn "$$: $self send_signal invoked; it's running but has no pid ($self->{command})", Carp::shortmess;
+        if ($self->{wait_promise}) {
+          $self->{wait_promise}->then (sub {
+            warn "$$: $self send_signal: |wait_promise| has been fulfilled: |$_[0]|\n";
+          }, sub {
+            warn "$$: $self send_signal: |wait_promise| was rejected: |$_[0]|\n";
+          });
+        }
         $_[0]->(_r killed => 0, name => '');
       }
     } else {
