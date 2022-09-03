@@ -288,9 +288,14 @@ sub wait ($) {
 sub send_signal ($$) {
   my ($self, $signal) = @_;
   return Promise->new (sub {
-    if ($self->running and defined $self->{pid}) {
-      my $pid = $self->{pid};
-      $_[0]->(_r killed => (kill $signal, $pid), name => '');
+    if ($self->running) {
+      if (defined $self->{pid}) {
+        my $pid = $self->{pid};
+        $_[0]->(_r killed => (kill $signal, $pid), name => '');
+      } else {
+        warn "$$: $self send_signal invoked; it's running but has no pid ($self->{command})";
+        $_[0]->(_r killed => 0, name => '');
+      }
     } else {
       $_[0]->(_r killed => 0, name => '');
     }
