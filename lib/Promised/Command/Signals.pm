@@ -17,6 +17,11 @@ our $Action = {
 
 my $DEBUG = $ENV{PROMISED_COMMAND_DEBUG};
 
+sub load_modules () {
+  require Carp;
+  require AbortController;
+}
+
 sub add_handler ($$$;%) {
   my (undef, $signal, $code, %args) = @_;
   return if $Handlers->{$signal}->{$code};
