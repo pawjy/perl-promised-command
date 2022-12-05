@@ -89,6 +89,8 @@ sub abort_signal ($) {
   return $ac->signal;
 } # abort_signal
 
+END { $GlobalAbortControllers = [] }
+
 package Promised::Command::Signals::Handler;
 
 sub DESTROY ($) {
